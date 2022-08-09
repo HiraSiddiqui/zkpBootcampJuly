@@ -101,15 +101,15 @@ end
 @external
 func bombard{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(game_idx : felt, x : felt, y : felt, square_reveal : felt):
     # read the game
+    
+    alloc_locals
     let (game) = games.read(game_idx)
     let (caller) = get_caller_address()
 
     # check if the caller is one of the players
     let (valid_caller) = check_caller(caller,game)
-    if valid_caller == 0:
-        #invalid caller
-        return ()
-    end
+    assert valid_caller = 0
+
 
     #check who is the caller
     let player1 = game.player1.address
@@ -124,18 +124,27 @@ func bombard{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, 
 
     #checks whether it is their move (first move can be by anyone).
     #Then it will check whether this is the very first move and whether it needs to process the square_reveal argument,
-    if game.last_move == (0,0):
-        #TODO
+    if game.last_move[0] == 0:
+        if game.last_move[1] == 0:
+            #TODO
+            let (square) = grid.read(game_idx, caller, x, y)
+            let new_square = Square(square.square_commit, square.square_reveal, 1)
+            grid.write(game_idx, caller, x, y, new_square)
+        end
     end
 
-
     # if it is not first move it will assert that is the right player and call check_hit. 
-    if game.last_move != (0,0):
-        # This is not the first move, need to check if this is the current player's move
-        let next_player = game.next_player
-        if next_player != current_player :
-            # player1 is not the next player - invalid call
-            return ()
+    if game.last_move[0] != 0:
+
+        if game.last_move[1] != 0:
+            # This is not the first move, need to check if this is the current player's move
+            let next_player = game.next_player
+
+            if next_player != current_player:
+
+                # player1 is not the next player - invalid call
+                #return ()
+            end
         end
     end
 
@@ -179,25 +188,19 @@ end
 ## loops until array length
 
 func load_hashes{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr}(idx : felt, game_idx : felt, hashes_len : felt, hashes : felt*, player : felt, x: felt, y: felt):
-    let (game) = games.read(game_idx)
-
-    if idx == hashes_len:
-        return ()
+    if hashes_len == 0:
+        return()
     end
-    %{print(ids.idx,ids.x,ids.y)%}   
 
-    grid.write(game_idx, player, x, y) = hashes[idx]
+    let (square) = grid.read(game_idx, player, x, y)
+    let updated_square = Square([hashes], square.square_reveal, square.shot)
+    grid.write(game_idx, player, x, y, updated_square)
 
-    let new_x = x + 1
-    let new_y = y
-    if new_x == 5:
-        new_x = 0
-        new_y = y +1
-    end 
+    if x == 4:
+        load_hashes(idx, game_idx, hashes_len - 1, hashes + 1, player, x = 0, y = y + 1)
+    end
 
-    let new_idx = idx + 1
-    load_hashes(new_idx,game_idx,hashes_len,hashes,player,new_x,y)
-    
-
-    return ()
+    if x != 4:
+        load_hashes(idx, game_idx, hashes_len - 1, hashes + 1, player, x = x + 1, y = y)
+    end
 end
