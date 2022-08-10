@@ -99,23 +99,6 @@ func check_hit{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr
 end
 
 
-#Function bombard, will take the game index, position to hit as well as the reveal for the previous hit by the othe player.
-
-#It will check whether the caller is one of the players and whether it is their move (first move can be by anyone).
-
-#Then it will check whether this is the very first move and whether it needs to process the square_reveal argument, if it is not first move it will assert that is the right player and call check_hit. If the player has accumulated four points, they are declared a winner.
-
-#If hit has been made, score for the previous player will be incremented.
-
-#The next player will be set to the opposite player depending on what current caller is.
-
-#The game struct under this particular game index will be updated to reflect changes in:
-
-#player points
-#next player
-#potential winner
-#last move
-
 @external
 func bombard{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, bitwise_ptr: BitwiseBuiltin*}(game_idx : felt, x : felt, y : felt, square_reveal : felt):
     # read the game
@@ -134,13 +117,13 @@ func bombard{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, 
     #check who is the caller
     let player1 = game.player1.address
     let player2 = game.player2.address
-    let current_player = 0
-    let other_player = 0
+    local current_player 
+    local other_player
     if caller == player1:
-        current_player = player1
+        current_player = caller
         other_player = player2
     else:
-        current_player = player2
+        current_player = caller
         other_player = player1
     end
 
@@ -153,61 +136,57 @@ func bombard{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_ptr, 
     #this is the first move
     if game.next_player == 0:
         # This is the first move. Update the game and return
-        let updatedGame = Game(game.player1,game.player2,game.player2.address, (x,y), game.winner)
+        let updatedGame = Game(game.player1,game.player2, other_player, (x,y), game.winner)
         games.write(game_idx, updatedGame)
         return ()
     end
 
     # if it is not first move it will assert that is the right player and call check_hit. 
     if game.next_player != 0:
-#        tempvar syscall_ptr = syscall_ptr
-#        tempvar pedersen_ptr = pedersen_ptr
-#        tempvar range_check_ptr = range_check_ptr
-#        tempvar bitwise_ptr = bitwise_ptr
-        let (last_square) = grid.read(game_idx, current_player, x, y)
-        let (isHit) = check_hit(last_square.square_commit, last_square.square_reveal)
+        assert game.next_player = current_player
+        let (last_square) = grid.read(game_idx, other_player, game.last_move[0], game.last_move[1])
+        let (isHit) = check_hit(last_square.square_commit, square_reveal)
 
         # if the battleship has been hit, update points for the current player and then update game
         if isHit == 1:
             if game.player1.address == current_player:
                 let points = game.player1.points + 1
-                let player1Obj = Player(game.player1.address, points, 0)                    
-                let updatedGame = Game(player1Obj,game.player2,game.player2.address, (x,y), game.winner)
-
+                let player1Obj = Player(game.player1.address, points, game.player1.revealed)                    
                 if points == 4:
-                    let updatedGame = Game(player1Obj,game.player2,game.player2.address, (x,y), game.player1.address)
+                    let updatedGame = Game(player1Obj,game.player2,other_player, (x,y), game.player1.address)
                     games.write(game_idx, updatedGame)
+                    return()
                 else:
+                    let updatedGame = Game(player1Obj,game.player2,other_player, (x,y), game.winner)
                     games.write(game_idx, updatedGame)
+                    return()
                 end
-
-                return()
             end
 
 
             if game.player2.address == current_player:
                 let points = game.player2.points + 1
-                let player2Obj = Player(game.player2.address, points, 0)                    
-                let updatedGame = Game(game.player1,player2Obj,game.player1.address, (x,y), game.winner)
+                let player2Obj = Player(game.player2.address, points, game.player2.revealed)                    
 
                 if points == 4:
-                    let updatedGame = Game(game.player1,player2Obj,game.player1.address, (x,y), game.player2.address)
+                    let updatedGame = Game(game.player1,player2Obj,other_player, (x,y), game.player2.address)
                     games.write(game_idx, updatedGame)
+                    return ()
                 else:
+                    let updatedGame = Game(game.player1,player2Obj,other_player, (x,y), game.winner)
                     games.write(game_idx, updatedGame)
+                    return ()
                 end
-                return ()
             end
-                    
+            return()         
         else:
             # update the game without updating any points
             let updatedGame = Game(game.player1,game.player2,other_player, (x,y), game.winner)
             games.write(game_idx, updatedGame)
             return ()
         end
-        return ()
-   end
-   return()
+    end
+    return()
 end
 
 ## Check malicious call
