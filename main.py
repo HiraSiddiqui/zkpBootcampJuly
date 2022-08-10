@@ -6,31 +6,31 @@ import sys
 import hashlib
 
 ex_map = {
-    #"ex1": "./exercises/cairo/ex1.cairo",
-    #"ex2": "./exercises/cairo/ex2.cairo",
-    #"ex3": "./exercises/cairo/ex3.cairo",
-    #"ex4": "./exercises/cairo/ex4.cairo",
-    #"ex5": "./exercises/cairo/ex5.cairo",
-    #"ex6": "./exercises/cairo/ex6.cairo",   
-    #"ex7": "./exercises/cairo/ex7.cairo",   
-    #"basic": "./exercises/contracts/basic/basic.cairo",
+    "ex1": "./exercises/cairo/ex1.cairo",
+    "ex2": "./exercises/cairo/ex2.cairo",
+    "ex3": "./exercises/cairo/ex3.cairo",
+    "ex4": "./exercises/cairo/ex4.cairo",
+    "ex5": "./exercises/cairo/ex5.cairo",
+    "ex6": "./exercises/cairo/ex6.cairo",   
+    "ex7": "./exercises/cairo/ex7.cairo",   
+    "basic": "./exercises/contracts/basic/basic.cairo",
     "battleship": "./exercises/contracts/battleship/battleship.cairo",
-    #"erc20": "./exercises/contracts/erc20/erc20.cairo",
-    #"erc721": "./exercises/contracts/erc721/erc721.cairo",    
+    "erc20": "./exercises/contracts/erc20/erc20.cairo",
+    "erc721": "./exercises/contracts/erc721/erc721.cairo",    
 }
 
 test_map = {
-    #"ex1": "./test/test_ex1.cairo",
-    #"ex2": "./test/test_ex2.cairo",
-    #"ex3": "./test/test_ex3.cairo",
-    #"ex4": "./test/test_ex4.cairo",
-    #"ex5": "./test/test_ex5.cairo",
-    #"ex6": "./test/test_ex6.cairo",   
-    #"ex7": "./test/test_ex7.cairo",   
-    #"basic": "./test/test_basic.cairo",
+    "ex1": "./test/test_ex1.cairo",
+    "ex2": "./test/test_ex2.cairo",
+    "ex3": "./test/test_ex3.cairo",
+    "ex4": "./test/test_ex4.cairo",
+    "ex5": "./test/test_ex5.cairo",
+    "ex6": "./test/test_ex6.cairo",   
+    "ex7": "./test/test_ex7.cairo",   
+    "basic": "./test/test_basic.cairo",
     "battleship": "./test/test_battleship.cairo",
-  #  "erc20": "./test/test_erc20.cairo",
-   # "erc721": "./test/test_erc721.cairo",
+    "erc20": "./test/test_erc20.cairo",
+    "erc721": "./test/test_erc721.cairo",
      
 }
 
