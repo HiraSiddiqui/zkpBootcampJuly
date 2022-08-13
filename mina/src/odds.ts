@@ -16,12 +16,11 @@ import {
     @state(PublicKey as any) ownerAddr = State<PublicKey>();
     @state(UInt64) pot = State<UInt64>();
     @state(UInt64) totalOdds = State<UInt64>();
-
     
     @method init(initialbalance: UInt64, ownerAddr: PublicKey, potValue: Field) {
-      this.ownerAddr.set(ownerAddr);
-      this.balance.addInPlace(initialbalance);
-      this.pot.set(new UInt64(potValue));
+        this.ownerAddr.set(ownerAddr);
+        this.balance.addInPlace(initialbalance);
+        this.pot.set(new UInt64(potValue));
     }
   
     @method startRound(setTotalOdds: Field, numberToGuess: Field, callerPrivKey: PrivateKey) {
