@@ -1,4 +1,11 @@
 {
   "version": 1,
-  "networks": {}
+  "networks": {
+    "add": {
+      "url": "localhost:8000",
+      "keyPath": "keys/add.json",
+      "fee": "1",
+      "smartContract": "Add"
+    }
+  }
 }
