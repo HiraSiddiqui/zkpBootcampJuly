@@ -75,19 +75,13 @@ export async function run() {
     Mina.getBalance(ownerAcc.toPublicKey()).toString()
   );
 
-  console.log('Owner starts the round');
-  let totalOdds = await askQuestion('what are the odds? \n');
-  let guess = await askQuestion('what should be the secret number? \n');
+  console.log('Owner/Player1 starts the round');
+  let totalOdds = await askQuestion('what are the odds? (Between 2 and 100) \n');
+  let guess = await askQuestion('what should be the secret number? (Between 1 and '+totalOdds+') \n');
 
   try {
-    Field(totalOdds).assertLte(100);
-    Field(totalOdds).assertGte(2);
-    Field(guess).assertLte(100);
-    Field(guess).assertGte(1);
-
     const tx2 = await Mina.transaction(ownerAcc, () => {
       let userParty = Party.createSigned(ownerAcc);
-
       zkAppInstance.startRound(Field(totalOdds),Field(guess), ownerAcc);
       userParty.balance.subInPlace(new UInt64(potValue));
       if (!doProofs) {
@@ -98,6 +92,7 @@ export async function run() {
     await tx2.send().wait();
   } catch (err) {
     console.log(err);
+    return;
   }
   console.log(
     'owner balance after starting round: ',
@@ -121,10 +116,9 @@ export async function run() {
     'hash of the guess is:',
     zkAppInstance.hashOfGuess.get().toString()
   );
-  let usersGuess = await askQuestion('Hey user2, what is your guess? \n');
+  let usersGuess = await askQuestion('Hey user2, the total odds are '+ totalOdds+', what is your guess? \n');
   try {
     const tx3 = await Mina.transaction(playerAcc, () => {
-      Field(usersGuess).assertLte(totalOdds);
       zkAppInstance.submitGuess(Field(usersGuess));
       if (!doProofs) {
         zkAppInstance.sign(zkAppPrivkey);
@@ -169,6 +163,7 @@ export async function run() {
   } catch (e) {
     console.log(e);
     console.log("wrong, you're a robot!");
+    return;
   }
 }
 

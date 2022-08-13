@@ -29,6 +29,12 @@ import {
       let callerAddr = callerPrivKey.toPublicKey();
       let potValue = this.pot.get();
       callerAddr.assertEquals(ownerAddr);
+
+      Field(setTotalOdds).assertLte(100);
+      Field(setTotalOdds).assertGte(2);
+      Field(numberToGuess).assertLte(100);
+      Field(numberToGuess).assertGte(1);
+
       this.totalOdds.set(new UInt64(setTotalOdds));
       this.balance.addInPlace(potValue);
       this.hashOfGuess.set(
