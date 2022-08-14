@@ -5,14 +5,13 @@
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256
+from starkware.cairo.common.uint256 import Uint256, uint256_add 
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
 
-
 @storage_var
-func counter() -> (updatedCounter: felt):
+func counter() -> (counter: Uint256):
 end
 
 @storage_var
@@ -93,13 +92,21 @@ func ownerOf{
 end
 
 @view
-func getCounter() -> (counter: Uint256):
-    let (counter) = counter.read()
-    return (counter)
+func getCounter{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }() -> (count: Uint256):
+    let (count) = counter.read()
+    return (count)
 end
 
 @view
-func getOriginalOwner(tokenId: Uint256) -> (originalOwner: felt):
+func getOriginalOwner{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(tokenId: Uint256) -> (originalOwner: felt):
     let (originalOwner) = og_owner.read(tokenId)
     return (originalOwner)
 end
@@ -205,11 +212,11 @@ func mint{
         range_check_ptr
     }(to: felt):
     Ownable.assert_only_owner()
-
     let (tokenId) = counter.read()
-    ## Add original hash
+
     ERC721._mint(to, tokenId)
-    counter.write(tokenId+1)
+    let (updatedCounter,_) = uint256_add(tokenId,Uint256(1,0))
+    counter.write(updatedCounter)
     og_owner.write(tokenId,to)
     return ()
 end

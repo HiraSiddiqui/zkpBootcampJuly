@@ -48,7 +48,7 @@ namespace IERC721:
     func renounceOwnership():
     end
 
-    func getCounter() -> (counter: Uint256):
+    func getCounter() -> (count: Uint256):
     end
 
     func getOriginalOwner(tokenId: Uint256) -> (originalOwner: felt):
