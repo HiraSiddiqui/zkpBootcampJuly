@@ -29,7 +29,9 @@ from exercises.contracts.erc20.ERC20_base import (
     ERC20_transfer,    
     ERC20_burn
 )
-
+@storage_var
+func admin_address() -> (adminAddress: felt):
+end
 #
 # Constructor
 #
@@ -45,6 +47,8 @@ func constructor{
         initial_supply: Uint256,
         recipient: felt
     ):
+    let (owner) = get_caller_address()
+    admin_address.write(owner)
     ERC20_initializer(name, symbol, initial_supply, recipient)    
     return ()
 end
@@ -63,6 +67,15 @@ func name{
     return (name)
 end
 
+@view
+func get_admin{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (admin_address: felt):
+    let (owner) = admin_address.read()
+    return (owner)
+end
 
 @view
 func symbol{
@@ -151,6 +164,14 @@ func burn{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(amount: Uint256) -> (success: felt):   
-    
-    return (0)
+    alloc_locals 
+    let (caller) = get_caller_address()
+    let (admin) = get_admin() 
+    ERC20_burn(caller, amount) # amount reduced from caller's balance
+
+    # discuss with professor, amount.low = 500 from test
+    # but the assert is for 50, why? 
+
+    ERC20_mint(admin, Uint256(amount.low, amount.high)) # amount increased in admin's balance
+    return (1)
 end
