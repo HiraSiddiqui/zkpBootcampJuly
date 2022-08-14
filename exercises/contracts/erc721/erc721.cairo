@@ -10,6 +10,15 @@ from openzeppelin.access.ownable import Ownable
 from openzeppelin.introspection.ERC165 import ERC165
 from openzeppelin.token.erc721.library import ERC721
 
+
+@storage_var
+func counter() -> (updatedCounter: felt):
+end
+
+@storage_var
+func og_owner(tokenId: Uint256) -> (og_owner: felt):
+end
+
 #
 # Constructor
 #
@@ -81,6 +90,18 @@ func ownerOf{
     }(tokenId: Uint256) -> (owner: felt):
     let (owner: felt) = ERC721.owner_of(tokenId)
     return (owner)
+end
+
+@view
+func getCounter() -> (counter: Uint256):
+    let (counter) = counter.read()
+    return (counter)
+end
+
+@view
+func getOriginalOwner(tokenId: Uint256) -> (originalOwner: felt):
+    let (originalOwner) = og_owner.read(tokenId)
+    return (originalOwner)
 end
 
 @view
@@ -182,11 +203,14 @@ func mint{
         pedersen_ptr: HashBuiltin*,
         syscall_ptr: felt*,
         range_check_ptr
-    }(to: felt, tokenId: Uint256):
+    }(to: felt):
     Ownable.assert_only_owner()
 
+    let (tokenId) = counter.read()
     ## Add original hash
     ERC721._mint(to, tokenId)
+    counter.write(tokenId+1)
+    og_owner.write(tokenId,to)
     return ()
 end
 

@@ -9,7 +9,8 @@ const MINT_ADMIN = 0x00348f5537be66815eb7de63295fcb5d8b8b2ffe09bb712af4966db7cbb
 const TEST_ACC1 = 0x00348f5537be66815eb7de63295fcb5d8b8b2ffe09bb712af4966db7cbb04a95
 const TEST_ACC2 = 0x3fe90a1958bb8468fb1b62970747d8a00c435ef96cda708ae8de3d07f1bb56b
 
-from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+#from openzeppelin.token.erc721.interfaces.IERC721 import IERC721
+from exercises.contracts.erc721.IERC721 import IERC721
 from exercises.contracts.erc20.IERC20 import IErc20 as Erc20
 
 @external
