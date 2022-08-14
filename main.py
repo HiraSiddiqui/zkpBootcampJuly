@@ -28,10 +28,9 @@ test_map = {
     "ex6": "./test/test_ex6.cairo",   
     "ex7": "./test/test_ex7.cairo",   
     "basic": "./test/test_basic.cairo",
-    "battleship": "./test/test_battleship.cairo",
+ "battleship": "./test/test_battleship.cairo",
     "erc20": "./test/test_erc20.cairo",
-    "erc721": "./test/test_erc721.cairo",
-     
+    "erc721": "./test/test_erc721.cairo",     
 }
 
 def check_exercises_finished(exercise_path):
