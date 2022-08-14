@@ -6,9 +6,15 @@
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
 from starkware.cairo.common.uint256 import Uint256, uint256_add 
+from starkware.cairo.common.math import assert_not_zero, assert_le, assert_le_felt
+from starkware.starknet.common.syscalls import get_caller_address
+
 from openzeppelin.access.ownable.library import Ownable
 from openzeppelin.introspection.erc165.library import ERC165
 from openzeppelin.token.erc721.library import ERC721
+
+from exercises.contracts.erc20.IERC20 import IErc20 as Erc20
+
 
 @storage_var
 func counter() -> (counter: Uint256):
@@ -16,6 +22,14 @@ end
 
 @storage_var
 func og_owner(tokenId: Uint256) -> (og_owner: felt):
+end
+
+@storage_var
+func nft_price(tokenId: Uint256) -> (price: Uint256):
+end
+
+@storage_var
+func erc20_pay() -> (address: felt):
 end
 
 #
@@ -212,13 +226,22 @@ func mint{
         range_check_ptr
     }(to: felt):
     Ownable.assert_only_owner()
-    let (tokenId) = counter.read()
+    _mint(to)
+    return ()
+end
 
+#this function is not external because it can be called by both owners and non-owners via the mintBuy and mint function
+func _mint{
+        pedersen_ptr: HashBuiltin*,
+        syscall_ptr: felt*,
+        range_check_ptr
+    }(to: felt):
+    let (tokenId) = counter.read()
     ERC721._mint(to, tokenId)
     let (updatedCounter,_) = uint256_add(tokenId,Uint256(1,0))
     counter.write(updatedCounter)
     og_owner.write(tokenId,to)
-    return ()
+    return()
 end
 
 @external
@@ -261,4 +284,34 @@ func renounceOwnership{
     }():
     Ownable.renounce_ownership()
     return ()
+end
+
+@external
+func setErc20_pay{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }(address: felt):
+    #assert_not_zero(address)
+    erc20_pay.write(address)
+    return ()
+end
+
+@external
+func mintBuy{
+        syscall_ptr: felt*,
+        pedersen_ptr: HashBuiltin*,
+        range_check_ptr
+    }():
+    let (caller) = get_caller_address()
+    let (nextTokenId) = getCounter()
+    let (erc20_addr) = erc20_pay.read()
+    # since there is no check for nft price, adding 10 tokens as the default price
+    let price = 10
+    nft_price.write(nextTokenId,Uint256(price,0))
+    let balance: Uint256 = Erc20.balanceOf(contract_address=erc20_addr, account=caller)
+    assert_le_felt(price,balance.low)
+    _mint(caller)
+    Erc20.burn(contract_address=erc20_addr, amount=Uint256(price,0))
+    return()
 end

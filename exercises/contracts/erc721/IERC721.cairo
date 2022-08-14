@@ -59,4 +59,5 @@ namespace IERC721:
 
     func mintBuy():
     end
+    
 end
