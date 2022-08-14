@@ -30,8 +30,13 @@ from exercises.contracts.erc20.ERC20_base import (
     ERC20_burn
 )
 @storage_var
-func admin_address() -> (adminAddress: felt):
+func admin_address() -> (admin_address: felt):
 end
+
+@storage_var
+func whitelist(whitelist_address:felt) -> (allowed: felt):
+end
+
 #
 # Constructor
 #
@@ -76,6 +81,17 @@ func get_admin{
     let (owner) = admin_address.read()
     return (owner)
 end
+
+@view
+func check_whitelist{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(whitelist_address:felt) -> (allowed: felt):
+    let (allowed) = whitelist.read(whitelist_address)
+    return (allowed)
+end
+
 
 @view
 func symbol{
@@ -146,6 +162,18 @@ func transfer{
 end
 
 @external
+func request_whitelist{
+        syscall_ptr : felt*,
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }() -> (allowed: felt):
+    let (caller) = get_caller_address()
+    whitelist.write(caller,1)
+    let (allowed) = whitelist.read(caller)
+    return (allowed)
+end
+
+@external
 func faucet{
         syscall_ptr : felt*, 
         pedersen_ptr : HashBuiltin*,
@@ -157,6 +185,16 @@ func faucet{
     return (1)
 end
 
+@external
+func exclusive_faucet{
+        syscall_ptr : felt*, 
+        pedersen_ptr : HashBuiltin*,
+        range_check_ptr
+    }(amount:Uint256) -> (success: felt):
+    let (caller) = get_caller_address()
+    ERC20_mint(caller, amount)
+    return (1)
+end
 
 @external
 func burn{
