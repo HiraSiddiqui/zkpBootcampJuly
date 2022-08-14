@@ -126,6 +126,8 @@ func transfer{
         range_check_ptr
     }(recipient: felt, amount: Uint256) -> (success: felt):
     #assert_not_equal(amount.low%2, 1)
+    let (quotient,remainder) = unsigned_div_rem (amount.low,2)
+    assert remainder = 0
     ERC20_transfer(recipient, amount)    
     return (1)
 end
