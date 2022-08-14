@@ -2,7 +2,7 @@
 
 %lang starknet
 from starkware.cairo.common.cairo_builtins import HashBuiltin
-from starkware.cairo.common.uint256 import Uint256, uint256_le, uint256_unsigned_div_rem, uint256_sub
+from starkware.cairo.common.uint256 import Uint256, uint256_le, uint256_unsigned_div_rem, uint256_sub, uint256_mul
 from starkware.starknet.common.syscalls import get_caller_address
 from starkware.cairo.common.math import unsigned_div_rem, assert_le_felt
 
@@ -52,8 +52,7 @@ func constructor{
         initial_supply: Uint256,
         recipient: felt
     ):
-    let (owner) = get_caller_address()
-    admin_address.write(owner)
+    admin_address.write(recipient)
     ERC20_initializer(name, symbol, initial_supply, recipient)    
     return ()
 end
@@ -179,7 +178,7 @@ func faucet{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(amount:Uint256) -> (success: felt):
-    assert_le(amount.low, 999999)
+    assert_le(amount.low, 10000)
     let (caller) = get_caller_address()
     ERC20_mint(caller, amount)
     return (1)
@@ -192,6 +191,8 @@ func exclusive_faucet{
         range_check_ptr
     }(amount:Uint256) -> (success: felt):
     let (caller) = get_caller_address()
+    let (isWhitelisted) = check_whitelist(caller)
+    assert isWhitelisted = 1
     ERC20_mint(caller, amount)
     return (1)
 end
@@ -205,11 +206,16 @@ func burn{
     alloc_locals 
     let (caller) = get_caller_address()
     let (admin) = get_admin() 
-    ERC20_burn(caller, amount) # amount reduced from caller's balance
 
-    # discuss with professor, amount.low = 500 from test
-    # but the assert is for 50, why? 
+    let (ten_percent, _) = uint256_unsigned_div_rem(amount, Uint256(10,0))
+    let (amount_to_burn, _) = uint256_mul(ten_percent, Uint256(9,0))
+    #let ten_percent = amount.low/10
+    #let amount_to_burn = ten_percent*9
+    #ERC20_transfer(admin, Uint256(ten_percent,0)) # amount increased in admin's balance
+    #ERC20_burn(caller, Uint256(amount_to_burn,0)) # amount burned
 
-    ERC20_mint(admin, Uint256(amount.low, amount.high)) # amount increased in admin's balance
+    ERC20_transfer(admin, ten_percent) # amount increased in admin's balance
+    ERC20_burn(caller, amount_to_burn) # amount burned
+    
     return (1)
 end
