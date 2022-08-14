@@ -125,7 +125,7 @@ func transfer{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(recipient: felt, amount: Uint256) -> (success: felt):
-
+    #assert_not_equal(amount.low%2, 1)
     ERC20_transfer(recipient, amount)    
     return (1)
 end
@@ -136,7 +136,7 @@ func faucet{
         pedersen_ptr : HashBuiltin*,
         range_check_ptr
     }(amount:Uint256) -> (success: felt):
-
+    assert_le(amount.low, 999999)
     let (caller) = get_caller_address()
     ERC20_mint(caller, amount)
     return (1)

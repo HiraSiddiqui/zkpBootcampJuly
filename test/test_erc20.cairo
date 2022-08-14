@@ -53,7 +53,7 @@ func test_faucet{syscall_ptr : felt*, pedersen_ptr : HashBuiltin*, range_check_p
     alloc_locals
 
     tempvar contract_address
-    %{ ids.contract_address = context.contract_a_address %}   
+    %{ ids.contract_address = context.contract_a_address %}
 
     ## Call as test_acc1
     %{stop_prank_callable = start_prank(ids.TEST_ACC1, ids.contract_address)%}   
