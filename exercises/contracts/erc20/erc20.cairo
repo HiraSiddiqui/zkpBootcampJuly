@@ -209,10 +209,6 @@ func burn{
 
     let (ten_percent, _) = uint256_unsigned_div_rem(amount, Uint256(10,0))
     let (amount_to_burn, _) = uint256_mul(ten_percent, Uint256(9,0))
-    #let ten_percent = amount.low/10
-    #let amount_to_burn = ten_percent*9
-    #ERC20_transfer(admin, Uint256(ten_percent,0)) # amount increased in admin's balance
-    #ERC20_burn(caller, Uint256(amount_to_burn,0)) # amount burned
 
     ERC20_transfer(admin, ten_percent) # amount increased in admin's balance
     ERC20_burn(caller, amount_to_burn) # amount burned

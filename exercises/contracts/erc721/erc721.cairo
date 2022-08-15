@@ -303,6 +303,7 @@ func mintBuy{
         pedersen_ptr: HashBuiltin*,
         range_check_ptr
     }():
+    alloc_locals
     let (caller) = get_caller_address()
     let (nextTokenId) = getCounter()
     let (erc20_addr) = erc20_pay.read()
@@ -311,7 +312,7 @@ func mintBuy{
     nft_price.write(nextTokenId,Uint256(price,0))
     let balance: Uint256 = Erc20.balanceOf(contract_address=erc20_addr, account=caller)
     assert_le_felt(price,balance.low)
+    #Erc20.burn(contract_address=erc20_addr, amount=Uint256(price,0)) -> check why isn't this working!
     _mint(caller)
-    Erc20.burn(contract_address=erc20_addr, amount=Uint256(price,0))
-    return()
+    return ()
 end
